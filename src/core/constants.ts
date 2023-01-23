@@ -10,7 +10,22 @@ export const config:IDBConfig = {
   appId: "1:295115190934:web:de0b33b53a514c3c"
 }
 
-export const constants:IConstants = {
+export const gfConfig: IDBConfig = {
+  apiKey: "AIzaSyCKGQw8QCq8qcxJ39QznQgarzOLP_WF1_Q",
+  authDomain: "jumia-17681.firebaseapp.com",
+  databaseURL: "https://jumia-17681.firebaseio.com",
+  projectId: "jumia-17681",
+  storageBucket: "jumia-17681.appspot.com",
+  messagingSenderId: "472156067665",
+  appId: "1:472156067665:web:976495829b072466"
+}
+
+export const constants = {
+  GIFTFINDERCOLLECTION: "giftfinder",
+  GIFTFINDERDOCSEVENT: "gift finder docs event",
+  ABOUT: "about",
+  CONFIG: "config",
+
   SHEETNAME: "campaign_calendar",
   NAME: "Campaign Calendar",
   TANDCS: "Campaign Calendar T & Cs",

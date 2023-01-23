@@ -9,6 +9,9 @@ export interface iConfig {
   desktopBanner: string;
   mobileAppBanner: string;
   mlp: string;
+  currency: string;
+  domain: string;
+  currencyPosition: string;
 }
 
 export interface iCategory {
@@ -44,4 +47,14 @@ export interface iDocument {
   id: string;
   name: string;
   skus: iSKU[]
+}
+
+export interface iDynamicObject {
+  [key: string]: any;
+}
+
+export interface iRemoteData {
+  about?: iAbout[];
+  config?: iConfig;
+  documents?: iDocument[]
 }

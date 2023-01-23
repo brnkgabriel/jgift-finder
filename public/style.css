@@ -558,6 +558,17 @@ body {
   color: white;
 }
 
+.-rules_eligibility .-re .-rule_element {
+  display: flex;
+  column-gap: 4px;
+}
+
+
+.-rules_eligibility .-re .-rule_element .-question {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
 .-rules_eligibility .-re .-rule_element,
 .-rules_eligibility .-re .-eligibility_element {
   margin: 15px 0;

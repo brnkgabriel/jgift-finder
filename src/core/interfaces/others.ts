@@ -11,6 +11,7 @@ export interface IDBConfig {
 }
 
 export interface IConstants {
+  ANOTHERDATA: string;
   SHEETNAME: string;
   NAME: string;
   TANDCS: string;

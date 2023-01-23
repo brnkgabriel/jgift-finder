@@ -1,33 +1,25 @@
 import { constants } from "./constants";
 import { IRemoteData } from "./interfaces/config";
 import { ICampaignCalendar } from "./interfaces/data";
-import { SKURows } from "./skurows";
-import { Tabs } from "./tabs";
+import { iAbout, iDynamicObject, iRemoteData } from "./types/index";
 import { Util } from "./util";
 
 export class Controller extends Util {
-  private data: ICampaignCalendar[]
-  private tandcs: ICampaignCalendar[]
+  private tandcs: iAbout[]
   private tandcsEl: HTMLElement
   private hiwCTA: HTMLElement
   private topBanner: HTMLElement
-  private tabs: Tabs
-  private skuRows: SKURows
 
-  constructor(remoteData: IRemoteData, fbox: any) {
+  constructor(remoteData: iRemoteData, fbox: any) {
     super(remoteData, fbox)
 
-    this.data = this.getData(constants.INITIATIVE)
-    this.tandcs = this.getData(constants.TANDCS)
+    this.tandcs = remoteData.about as iAbout[]
 
     this.tandcsEl = this.el(constants.TANDCSQUERY)
     this.hiwCTA = this.el(constants.HOWITWORKSQUERY)
     this.topBanner = this.el(constants.TOPBANNERQUERY)
 
     this.hiwCTA.addEventListener(constants.CLICK, this.toggleBanner.bind(this))
-
-    this.tabs = new Tabs(remoteData, fbox)
-    this.skuRows = new SKURows(remoteData, fbox)
 
     this.fbox.pubsub.subscribe(constants.RESET, this.init.bind(this))
 
@@ -39,13 +31,6 @@ export class Controller extends Util {
   }
 
   init() {
-    const allTimes = this.times(this.data)
-    const pastFuture = this.pastAndFutureTimes(allTimes)
-    const additionalTimes = this.additionalTimes(pastFuture)
-    .filter(time => time !== undefined)
-    const reorderedTimes = pastFuture.future.concat(additionalTimes)
-    const groupedSKUs = this.group(this.data, reorderedTimes)
-    this.fbox.pubsub.emit(constants.BUILD, { reorderedTimes, groupedSKUs })
 
     return this
   }
@@ -68,7 +53,7 @@ export class Controller extends Util {
     return this
   }
 
-  tandcHTML(tandc: ICampaignCalendar) {
-    return `<div class="-rule_element"><div class="-inlineblock -vatop -num">${tandc.sku}.</div><div class="-inlineblock -vatop -desc">${tandc.name}</div></div>`
+  tandcHTML(tandc: iAbout) {
+    return `<div class="-rule_element"><div class="-vatop -num">${tandc.num}</div><div class="-vatop -desc"><div class="-question">${tandc.question}</div><div class="-answer">${tandc.answer}</div></div></div>`
   }
 }

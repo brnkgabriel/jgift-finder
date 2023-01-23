@@ -1,66 +1,50 @@
-import { IDomain, IRemoteConfig, IRemoteData } from "./interfaces/config";
+import { IDomain, IRemoteConfig } from "./interfaces/config";
 import { IPastAndFutureTimes } from "./interfaces/others";
 import { constants, fxn } from "./constants";
 import { ICampaignCalendar } from "./interfaces/data";
+import { iConfig, iDynamicObject, iRemoteData } from "./types/index";
 
 // type TypeOrNull<T> = T | null;
 
 export class Util {
-  private remoteData:IRemoteData;
+  private remoteData:iRemoteData;
   private timeInterval:number = 0;
-  private minutesDuration: number;
   private currency: string;
-  private config: IRemoteConfig;
-  private domain: IDomain;
+  private config: iConfig;
+  private domain: string;
   protected el;
   protected all;
   private pad;
-  private endTime;
   private skuRow;
   // private skuRows;
   private tab;
   private live;
   private skuID;
   private capitalize;
-  private oosByTime;
-  private isItMyTime;
-  private isPast;
-  private isFuture;
   private digit;
   protected isATab;
   private midnight;
   protected fbox;
 
-  constructor(remoteData: IRemoteData, fbox: any) {
+  constructor(remoteData: iRemoteData, fbox: any) {
     this.remoteData = remoteData
-    this.minutesDuration = Number(this.remoteData.config.minute_duration_campaign_calendar)
-    this.currency = this.remoteData.config.currency
-    this.config = this.remoteData.config
-    this.domain = this.remoteData.domain
+    this.currency = (this.remoteData.config as iConfig).currency
+    this.config = this.remoteData.config as iConfig
+    this.domain = this.remoteData.config?.domain as string
     this.fbox = fbox
 
     this.el = (query: string) => document.querySelector(fxn.idQuery(query)) as HTMLElement
     this.all = (query: string) => document.querySelectorAll(fxn.idQuery(query))
     this.pad = (time: number) => time.toString().length == 1 ? "0" + time : time
-    this.endTime = (time: number) => time + (this.minutesDuration * 60 * 1000)
     this.skuRow = (time: number) => this.el(fxn.timeQuery(time))
     // this.skuRows = () => this.all(constants.SKUROWQUERY)
     this.tab = (time: number) => this.el(fxn.tabQuery(time))
     this.live = (list: HTMLElement[], action: "add" | "remove") => list.forEach(each => each.classList[action](constants.LIVECLASS))
     this.skuID = (sku: ICampaignCalendar) => sku.name + "-" + (+new Date(sku.time))
     this.capitalize = (str: string) => str[0].toUpperCase() + str.slice(1)
-    this.oosByTime = (times: number[]) => times.map(time => this.skuRow(time)?.classList.add(constants.OOSCLASS))
-    this.isItMyTime = (sku: ICampaignCalendar, time: number) => +new Date(sku.time) === time
-    this.isPast = (time: number) => Date.now() > time && Date.now() > this.endTime(time)
-    this.isFuture = (time: number, past: number[]) => past.indexOf(time) === -1
     this.digit = (num: number, unit: string) => num !== 0 ? this.pad(num) + unit : ""
     this.isATab = (el: HTMLElement) => el.classList.contains(constants.TABCLASS) 
     this.midnight = (time: number | string) => +new Date(time).setHours(0, 0, 0, 0)
-  }
-
-  getData(initiative: string) {
-    const list = this.remoteData.json_list as ICampaignCalendar[]
-    return list.filter((datum) => datum.initiative === initiative)
   }
 
   times(skus:ICampaignCalendar[]) {
@@ -69,37 +53,6 @@ export class Util {
     return uniqueTimes.sort((a, b) => a - b)
   }
 
-  group(skuList: ICampaignCalendar[], times: number[]) {
-    return times.map(time => {
-      const skus = skuList.filter(sku => this.isItMyTime(sku, time))
-      return { time, skus }
-    })
-  }
-
-  pastAndFutureTimes(times: number[]) {
-    const past = times.filter(this.isPast)
-    const future = times.filter(time => this.isFuture(time, past))
-    return { past, future }
-  }
-
-  additionalTimes(pastFutureTimes: IPastAndFutureTimes) {
-    const future = pastFutureTimes.future
-    const past = pastFutureTimes.past
-    const addTimes = this.addition(future, past)
-    return future.length < constants.TIMESLOTSTODISPLAY ? addTimes : []
-  }
-
-  addition(future: number[], past: number[]) {
-    const additional = []
-    const remaining = constants.TIMESLOTSTODISPLAY - future.length
-
-    for (let i = remaining; i > -1; i--) {
-      const endIdx = past.length - 1
-      const idx = endIdx - i
-      additional.push(past[idx])
-    }
-    return additional
-  }
 
   timeUnits(time: number) {
     const $date = new Date(time)
@@ -162,7 +115,7 @@ export class Util {
   }
 
   formatPrice(price: string) {
-    const formatted = this.config.currency_position === constants.PREFIX
+    const formatted = this.config.currencyPosition === constants.PREFIX
     ? `${this.currency} ${Number(price).toLocaleString()}`
     : `${Number(price).toLocaleString()} ${this.config.currency}`
 
@@ -193,21 +146,6 @@ export class Util {
     return keyStr as KeyType
   }
 
-  badge(sku: ICampaignCalendar) {
-    const badgeId = this.id(sku.type, "_")
-    const iconKey = this.key(`${badgeId}_icon`, this.config)
-    const typeKey = this.key(sku.type, this.config)
-    const badgeIcon = this.config[iconKey]
-
-    const badgeText = sku.type === "Generic" ? "Limited Stock" : sku.type
-    const badge = badgeIcon
-    ? `<img class="lazy-image" data-src="${badgeIcon}" alt="sku_img"/>`
-    : badgeText
-    
-    return badgeIcon
-    ? `<div class="-tag -inlineblock -vamiddle -b-img -${this.id(sku.type, '-')}"><span class="-posabs -preloader -loading"></span>${badge}</div>`
-    : `<div class="-tag -inlineblock -vamiddle -${this.id(sku.type, '-')}" style="background-color:${this.config[typeKey]}">${badge}</div>`
-  }
 
   timeFormat(time: number) {
     const tUnits = this.timeUnits(time)
@@ -228,17 +166,11 @@ export class Util {
     const dBannerStr = constants.SHEETNAME + "_desktop_banner"
     const deeplinkStr = constants.SHEETNAME + "_deeplink"
 
-    const mBannerKey = this.key(mBannerStr, this.config)
-    const dBannerKey = this.key(dBannerStr, this.config)
-    const deeplinkKey = this.key(deeplinkStr, this.config)
-
-    const mBanner = this.config[mBannerKey]
-    const dBanner = this.config[dBannerKey]
-    const deeplink = this.config[deeplinkKey]
+    const mBanner = this.config.mobileAppBanner
+    const dBanner = this.config.desktopBanner
 
     const banner = isMobile ? mBanner : dBanner
-    const lvlink = isMobile ? deeplink : (`${this.domain.host}/${this.config.download_apps_page}`)
     
-    return { banner, live_link: lvlink }
+    return { banner }
   }
 }
