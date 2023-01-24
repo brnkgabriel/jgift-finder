@@ -25,6 +25,7 @@ export class Util {
   protected isATab;
   private midnight;
   protected fbox;
+  protected isMobile = navigator.userAgent.toLowerCase().includes("mobi")
 
   constructor(remoteData: iRemoteData, fbox: any) {
     this.remoteData = remoteData
@@ -33,8 +34,8 @@ export class Util {
     this.domain = this.remoteData.config?.domain as string
     this.fbox = fbox
 
-    this.el = (query: string) => document.querySelector(fxn.idQuery(query)) as HTMLElement
-    this.all = (query: string) => document.querySelectorAll(fxn.idQuery(query))
+    this.el = (query: string, parent?: HTMLElement) => parent ? parent.querySelector(fxn.idQuery(query)) as HTMLElement : document.querySelector(fxn.idQuery(query)) as HTMLElement
+    this.all = (query: string, parent?: HTMLElement) => parent ? parent.querySelectorAll(fxn.idQuery(query)) : document.querySelectorAll(fxn.idQuery(query))
     this.pad = (time: number) => time.toString().length == 1 ? "0" + time : time
     this.skuRow = (time: number) => this.el(fxn.timeQuery(time))
     // this.skuRows = () => this.all(constants.SKUROWQUERY)

@@ -20,7 +20,8 @@ export interface iCategory {
   name: string;
   price_point: string;
   sku_count: string;
-  skus: iSKU[]
+  skus: iSKU[],
+  url: string;
 }
 
 export interface iPrice {
@@ -41,11 +42,13 @@ export interface iSKU {
   url: string;
 }
 
-export interface iDocument {
-  backgroundColor: string;
+export interface iSuperblock {
+  darkShade: string;
+  lightShade: string;
   categories: iCategory[];
   id: string;
   name: string;
+  url: string;
   skus: iSKU[]
 }
 
@@ -56,5 +59,9 @@ export interface iDynamicObject {
 export interface iRemoteData {
   about?: iAbout[];
   config?: iConfig;
-  documents?: iDocument[]
+  superblocks?: iSuperblock[]
+}
+
+export interface iCatMap {
+  category: iCategory
 }

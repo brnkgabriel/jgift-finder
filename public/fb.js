@@ -261,7 +261,6 @@ var Featurebox = (function (json) {
     }
 
     getDoc(collection, docRef, event) {
-      console.trace(docRef)
       return this.firestore.collection(collection).doc(docRef)
       .get().then(doc => pubsub.emit(event, doc.exists ? doc.data() : {}))
       .catch(err => console.error(err))

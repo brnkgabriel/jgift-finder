@@ -1,7 +1,7 @@
 import { constants } from "./constants";
 import { IRemoteData } from "./interfaces/config";
 import { ICampaignCalendar } from "./interfaces/data";
-import { iAbout, iDynamicObject, iRemoteData } from "./types/index";
+import { iAbout, iCategory, iDynamicObject, iRemoteData, iSKU, iSuperblock } from "./types/index";
 import { Util } from "./util";
 
 export class Controller extends Util {
@@ -9,37 +9,163 @@ export class Controller extends Util {
   private tandcsEl: HTMLElement
   private hiwCTA: HTMLElement
   private topBanner: HTMLElement
+  private mainEl: HTMLElement
+  private superblocks: iSuperblock[]
+  private superblockMap?: iSuperblock
 
   constructor(remoteData: iRemoteData, fbox: any) {
     super(remoteData, fbox)
 
+    console.log("remoteData", remoteData)
+
     this.tandcs = remoteData.about as iAbout[]
+    this.superblocks = remoteData.superblocks as iSuperblock[]
+    this.superblockMap = undefined
 
     this.tandcsEl = this.el(constants.TANDCSQUERY)
     this.hiwCTA = this.el(constants.HOWITWORKSQUERY)
     this.topBanner = this.el(constants.TOPBANNERQUERY)
+    this.mainEl = this.el(constants.MAINELQUERY)
 
     this.hiwCTA.addEventListener(constants.CLICK, this.toggleBanner.bind(this))
 
     this.fbox.pubsub.subscribe(constants.RESET, this.init.bind(this))
 
     this.init()
-    .setBanner()
-    .displayTAndCs()
-    .show()
-    
+      .setBanner()
+      .displayTAndCs()
+      .show()
+      .listeners()
   }
 
   init() {
-
+    this.mainEl.innerHTML = this.superblocks.map(this.buildSuperblock.bind(this)).join("")
     return this
+  }
+
+  listeners() {
+    this.mainEl.addEventListener("click", this.handleClick.bind(this))
+  }
+
+  handleClick(evt: Event) {
+    const target: HTMLElement = evt.target as HTMLElement
+
+    const type = target.getAttribute("data-type")
+
+    switch (type) {
+      case constants.CATTYPE:
+        const category = target.getAttribute("data-category")
+        const superblock = target.getAttribute("data-superblock")
+        this.superblockMap = this.superblocks.find(sb => sb.name === superblock) as iSuperblock
+        this.updateProductFloor(category as string)
+        break;
+      case constants.DIRBTN:
+        const direction = target.getAttribute("data-dir")
+        const productfloor = target.parentElement
+        const scrollale = this.el(".-product-scrollable", productfloor as HTMLElement).parentElement
+        console.log("scrollable", scrollale, "direction", direction)
+        direction === constants.NEXT
+        ? this.scrollTonext(scrollale as HTMLElement)
+        : this.scrollToprev(scrollale as HTMLElement)
+        break;
+    
+      default:
+        break;
+    }
+
+  }
+  
+  scrollTonext(scrollable: HTMLElement) {
+    var start = scrollable.scrollLeft + 80, end = scrollable.scrollLeft + 300
+    var delta = end - start;
+    scrollable.scrollLeft = start + delta * 1;
+  }
+
+  scrollToprev(scrollable: HTMLElement) {
+    var start = scrollable.scrollLeft - 80, end = scrollable.scrollLeft - 300
+    var delta = end - start;
+    scrollable.scrollLeft = start + delta * 1;
+  } 
+
+  buildSuperblock(superblock: iSuperblock) {
+    let superblockHtml = `<div class="-superblock" data-name="${superblock.name}">`
+    const title = `<div class="-title" style="background-color: ${superblock.lightShade};">${superblock.name}</div>`
+    const freelinks = this.buildFreelinks(superblock.categories, superblock)
+    const productFloor = this.buildProductFloor(superblock)
+
+    superblockHtml += superblock.categories.length >= 1 ? title : ""
+    superblockHtml += freelinks
+    superblockHtml += productFloor
+    superblockHtml += '</div>'
+    
+    return superblock.skus.length >= 7 ? superblockHtml : ""
+  }
+
+  updateProductFloor(category: string) {
+    const superblockEl = this.el(`.-superblock[data-name="${this.superblockMap?.name}"]`)
+    const productFloor = this.el(".-productfloor", superblockEl)
+    const productFloorTitle = this.el(".-productfloor .-title", superblockEl)
+    const productFloorSeeAlll = this.el(".-see-all", superblockEl)
+
+    const catObj = this.superblockMap?.categories.find(cat => cat.name === category)
+
+    productFloorTitle.innerHTML = `<div class="-title-name">${category}</div><div class="-title-desc">${catObj?.price_point}</div>`
+    
+    productFloorSeeAlll.setAttribute("href", catObj?.url as string)
+
+    const actual = this.el(".-skus.-actual", productFloor)
+
+    actual.innerHTML = `<div class="-product-scrollable">${catObj?.skus.slice(0,16).map(this.skuHtml.bind(this)).join("")}</div>`
+    this.show()
+    console.log("superblock el", superblockEl, "actual", actual)
+  }
+
+  buildFreelinks(categories: iCategory[], superblock: iSuperblock) {
+    let catHtml = '<div class="-cats -posrel -single">'
+    const freelinks = categories.map(category => this.catHtml(category, superblock))
+    .join("")
+    catHtml += categories.length > 0 ? `<div class="-scrollable">${freelinks}</div>` : ""
+    catHtml += '</div>'
+    return catHtml
+  }
+
+  catHtml(category: iCategory, superblock: iSuperblock) {
+    this.superblockMap = superblock
+    return `<div class="-cat -posrel" data-category="${category.name}" data-url="${category.url}" style="background-color: ${superblock.lightShade}"><div class="-clickable -posabs" data-type="category" data-superblock="${superblock.name}"  data-category="${category.name}"></div><span class="-posabs -preloader -loading" data-type="category"></span><img class="lazy-image" data-src="${category.image}" alt="${category.name}" /><div class="-posabs -name"><div class="-txt -posabs -name-el">${category.name}</div><div class="-bg -posabs -name-el" style="background-color:${superblock.darkShade}dd;color:white"></div></div><div class="-price-point">${category.price_point}</div></div>`
+  }
+
+  buildProductFloor(superblock: iSuperblock) {
+    const prevNextButtons = this.isMobile ? '' : '<div class="-control -prev -posabs" data-dir="prev" data-type="dir-btn"><span class="-posabs -preloader -loading"></span></div><div class="-control -next -posabs"  data-type="dir-btn" data-dir="next"><span class="-posabs -preloader -loading"></span></div>'
+
+    let html = `<div class="-productfloor active -posrel" data-name="${superblock.name}">${prevNextButtons}`
+
+    html += `<div class="-head" style="background-color:${superblock.lightShade}"><div class="-title"><div class="-title-name">${superblock.name}</div><div class="-title-desc">top deals</div></div><a href="${superblock.url}" class="-see-all" target="_blank"><span class="-txt">See all</span><span class="-arrow" style="border: 2px solid black"></span></a></div>`
+
+    html += `<div class="-skus -actual"><div class="-product-scrollable">${superblock.skus.slice(0,16).map(this.skuHtml.bind(this)).join("")}</div></div><div class="-skus -skeleton"><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div></div>`
+
+    html += "</div>"
+    return html
+  }
+
+  skuHtml(skuObj: iSKU) {
+    const {
+      sku, displayName,
+      url, prices: { oldPrice, price, discount },
+      image
+    } = skuObj
+    const discountHtml = discount ? `<div class="-discount -posabs">${discount}</div>` : ""
+    const oldPriceHtml = discount ? `<div class="-oldPrice">${oldPrice}</div>` : ""
+
+    return `
+    <a href="${url}" data-sku="${sku}" class="-posrel -sku"><div class="-img -posrel"><span class="-posabs -preloader -loading"></span><img class="lazy-image" data-src="${image}" alt="${displayName}"/></div>${discountHtml} <div class="-details"><div class="-name">${displayName}</div><div class="-newPrice">${price}</div>${oldPriceHtml}</div></a>
+    `
   }
 
   toggleBanner() {
     this.topBanner.classList.toggle(constants.SHOWCLASS)
     const hiwText = this.hiwCTA.querySelector(constants.TXTCLASS) as HTMLElement
     hiwText.textContent = hiwText?.textContent === constants.TERMSANDCONDIIONS
-    ? constants.CLOSE : constants.TERMSANDCONDIIONS
+      ? constants.CLOSE : constants.TERMSANDCONDIIONS
   }
 
   setBanner() {

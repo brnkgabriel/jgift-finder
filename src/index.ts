@@ -18,7 +18,7 @@ const databaseOperations = () => {
 databaseOperations()
 
 fbox.pubsub.subscribe(constants.GIFTFINDERDOCSEVENT, (data: any) => {
-  let remoteData: iRemoteData = { documents: [] }
+  let remoteData: iRemoteData = { superblocks: [] }
   
   const keys = Object.keys(data)
   keys.map(key => {
@@ -27,8 +27,7 @@ fbox.pubsub.subscribe(constants.GIFTFINDERDOCSEVENT, (data: any) => {
         break;
       case constants.CONFIG: remoteData.config = data[key]
         break;
-      default:
-        remoteData.documents?.push(data[key])
+      default: remoteData.superblocks?.push(data[key])
         break;
     }
   })
