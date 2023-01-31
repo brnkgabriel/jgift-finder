@@ -16,8 +16,6 @@ export class Controller extends Util {
   constructor(remoteData: iRemoteData, fbox: any) {
     super(remoteData, fbox)
 
-    console.log("remoteData", remoteData)
-
     this.tandcs = remoteData.about as iAbout[]
     this.superblocks = remoteData.superblocks as iSuperblock[]
     this.superblockMap = undefined
@@ -39,7 +37,8 @@ export class Controller extends Util {
   }
 
   init() {
-    this.mainEl.innerHTML = this.superblocks.map(this.buildSuperblock.bind(this)).join("")
+    const randomized = [...this.superblocks].sort(() => Math.random() - 0.5)
+    this.mainEl.innerHTML = randomized.map(this.buildSuperblock.bind(this)).join("")
     return this
   }
 
@@ -68,7 +67,9 @@ export class Controller extends Util {
         ? this.scrollTonext(scrollale as HTMLElement)
         : this.scrollToprev(scrollale as HTMLElement)
         break;
-    
+      case constants.SEEALL:
+        const url = target.getAttribute("data-href")
+        location.href = url as string
       default:
         break;
     }
@@ -105,19 +106,18 @@ export class Controller extends Util {
     const superblockEl = this.el(`.-superblock[data-name="${this.superblockMap?.name}"]`)
     const productFloor = this.el(".-productfloor", superblockEl)
     const productFloorTitle = this.el(".-productfloor .-title", superblockEl)
-    const productFloorSeeAlll = this.el(".-see-all", superblockEl)
+    const productFloorSeeAll = this.el(".-see-all-clickable", superblockEl)
 
     const catObj = this.superblockMap?.categories.find(cat => cat.name === category)
 
     productFloorTitle.innerHTML = `<div class="-title-name">${category}</div><div class="-title-desc">${catObj?.price_point}</div>`
     
-    productFloorSeeAlll.setAttribute("href", catObj?.url as string)
+    productFloorSeeAll.setAttribute("data-href", catObj?.url as string)
 
     const actual = this.el(".-skus.-actual", productFloor)
 
     actual.innerHTML = `<div class="-product-scrollable">${catObj?.skus.slice(0,16).map(this.skuHtml.bind(this)).join("")}</div>`
     this.show()
-    console.log("superblock el", superblockEl, "actual", actual)
   }
 
   buildFreelinks(categories: iCategory[], superblock: iSuperblock) {
@@ -131,7 +131,7 @@ export class Controller extends Util {
 
   catHtml(category: iCategory, superblock: iSuperblock) {
     this.superblockMap = superblock
-    return `<div class="-cat -posrel" data-category="${category.name}" data-url="${category.url}" style="background-color: ${superblock.lightShade}"><div class="-clickable -posabs" data-type="category" data-superblock="${superblock.name}"  data-category="${category.name}"></div><span class="-posabs -preloader -loading" data-type="category"></span><img class="lazy-image" data-src="${category.image}" alt="${category.name}" /><div class="-posabs -name"><div class="-txt -posabs -name-el">${category.name}</div><div class="-bg -posabs -name-el" style="background-color:${superblock.darkShade}dd;color:white"></div></div><div class="-price-point">${category.price_point}</div></div>`
+    return `<div class="-cat -posrel" data-category="${category.name}" data-url="${category.url}" style="background-color: ${superblock.lightShade}"><span class="-posabs -preloader -loading"></span><div class="-clickable -posabs" data-type="category" data-superblock="${superblock.name}"  data-category="${category.name}"></div><span class="-posabs -preloader -loading" data-type="category"></span><img class="lazy-image" data-src="${category.image}" alt="${category.name}" /><div class="-posabs -name"><div class="-txt -posabs -name-el">${category.name}</div><div class="-bg -posabs -name-el" style="background-color:${superblock.darkShade}dd;color:white"></div></div><div class="-price-point">${this.formatPrice(category.price_point)}</div></div>`
   }
 
   buildProductFloor(superblock: iSuperblock) {
@@ -139,9 +139,9 @@ export class Controller extends Util {
 
     let html = `<div class="-productfloor active -posrel" data-name="${superblock.name}">${prevNextButtons}`
 
-    html += `<div class="-head" style="background-color:${superblock.lightShade}"><div class="-title"><div class="-title-name">${superblock.name}</div><div class="-title-desc">top deals</div></div><a href="${superblock.url}" class="-see-all" target="_blank"><span class="-txt">See all</span><span class="-arrow" style="border: 2px solid black"></span></a></div>`
+    html += `<div class="-head" style="background-color:${superblock.lightShade}"><div class="-title"><div class="-title-name">${superblock.name}</div><div class="-title-desc">top deals</div></div><div class="-see-all"><span class="-see-all-clickable"  data-href="${superblock.url}" data-type="see all"></span><span class="-txt">See all</span><span class="-arrow" style="border: 2px solid black"></span></div></div>`
 
-    html += `<div class="-skus -actual"><div class="-product-scrollable">${superblock.skus.slice(0,16).map(this.skuHtml.bind(this)).join("")}</div></div><div class="-skus -skeleton"><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div><div class="-posrel -sku"><div class="-img -posrel"><img src="https://ng.jumia.is/cms/0-1-initiatives/placeholder_300x300.png" /></div><div class="-details"><div class="-name -posrel"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div><div class="-txt" style="background-color:#f5f5f5;height:14px;width:80%"></div></div><div class="-newPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:50%;margin:4px 0"></div></div><div class="-oldPrice"><div class="-txt" style="background-color:#f5f5f5;height:14px;width:40%"></div></div></div></div></div>`
+    html += `<div class="-skus -actual"><div class="-product-scrollable">${superblock.skus.slice(0,16).map(this.skuHtml.bind(this)).join("")}</div></div>`
 
     html += "</div>"
     return html

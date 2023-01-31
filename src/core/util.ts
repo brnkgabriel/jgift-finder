@@ -116,11 +116,17 @@ export class Util {
   }
 
   formatPrice(price: string) {
-    const formatted = this.config.currencyPosition === constants.PREFIX
-    ? `${this.currency} ${Number(price).toLocaleString()}`
-    : `${Number(price).toLocaleString()} ${this.config.currency}`
 
-    return Number(price) === 0 ? constants.FREE : formatted
+    const pieces = price.split(" ")
+    const value = Number(pieces[1].replace("₦", "")) 
+    if (isNaN(value)) return price
+
+    switch (this.config.currencyPosition) {
+      case constants.PREFIX:
+        return `Below ${this.currency} ${value.toLocaleString()}`
+      default:
+        return `Below ${value.toLocaleString()} ${this.currency}`
+    }
   }
 
   discount($old: string, $new: string) {

@@ -25,6 +25,7 @@ export const constants = {
   GIFTFINDERDOCSEVENT: "gift finder docs event",
   ABOUT: "about",
   CONFIG: "config",
+  SEEALL: "see all",
 
   SHEETNAME: "campaign_calendar",
   NAME: "Campaign Calendar",

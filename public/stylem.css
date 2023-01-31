@@ -309,14 +309,26 @@ body {
   justify-content: center;
   align-items: center;
   column-gap: 2px;
+  height: 100%;
+  position: relative;
+}
+
+.-superblock .-productfloor .-head .-see-all .-see-all-clickable {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  z-index: 2;
+  cursor: pointer;
 }
 .-superblock .-productfloor .-head .-see-all .-txt { 
   text-transform: uppercase;
   font-weight: 500;
   align-items: center;
   column-gap: 4px;
-  font-size: 14px;
-  height: 100%;
+  font-size: 14px; 
 }
 
 .-superblock .-productfloor .-head .-see-all .-arrow {

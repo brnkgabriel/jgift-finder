@@ -302,6 +302,18 @@ body {
   justify-content: center;
   align-items: center;
   column-gap: 2px;
+  height: 100%;
+  position: relative;
+}
+.-superblock .-productfloor .-head .-see-all .-see-all-clickable {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  z-index: 2;
+  cursor: pointer;
 }
 .-superblock .-productfloor .-head .-see-all .-txt { 
   text-transform: uppercase;
@@ -309,7 +321,6 @@ body {
   align-items: center;
   column-gap: 4px;
   font-size: 14px;
-  height: 100%;
 }
 
 .-superblock .-productfloor .-head .-see-all .-arrow {
