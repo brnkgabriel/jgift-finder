@@ -1,6 +1,4 @@
 import { constants } from "./constants";
-import { IRemoteData } from "./interfaces/config";
-import { ICampaignCalendar } from "./interfaces/data";
 import { iAbout, iCategory, iDynamicObject, iRemoteData, iSKU, iSuperblock } from "./types/index";
 import { Util } from "./util";
 
@@ -10,20 +8,24 @@ export class Controller extends Util {
   private hiwCTA: HTMLElement
   private topBanner: HTMLElement
   private mainEl: HTMLElement
-  private superblocks: iSuperblock[]
-  private superblockMap?: iSuperblock
+  private categories: iCategory[]
+  private map?: iCategory
+  private flipper: HTMLElement
+  private switchBtn: HTMLElement
 
   constructor(remoteData: iRemoteData, fbox: any) {
     super(remoteData, fbox)
 
     this.tandcs = remoteData.about as iAbout[]
-    this.superblocks = remoteData.superblocks as iSuperblock[]
-    this.superblockMap = undefined
+    this.categories = remoteData.categories as iCategory[]
+    this.map = undefined
 
     this.tandcsEl = this.el(constants.TANDCSQUERY)
     this.hiwCTA = this.el(constants.HOWITWORKSQUERY)
     this.topBanner = this.el(constants.TOPBANNERQUERY)
     this.mainEl = this.el(constants.MAINELQUERY)
+    this.flipper = this.el(constants.FLIPPERQUERY)
+    this.switchBtn = this.el(constants.SWITCHQUERY)
 
     this.hiwCTA.addEventListener(constants.CLICK, this.toggleBanner.bind(this))
 
@@ -37,9 +39,23 @@ export class Controller extends Util {
   }
 
   init() {
-    const randomized = [...this.superblocks].sort(() => Math.random() - 0.5)
-    this.mainEl.innerHTML = randomized.map(this.buildSuperblock.bind(this)).join("")
+    console.log("this.categories", this.categories)
+    // const randomized = [...this.categories].sort(() => Math.random() - 0.5)
+    // this.mainEl.innerHTML = randomized.map(this.buildSuperblock.bind(this)).join("")
+    this.mainEl.innerHTML = this.buildSuperblock(this.categories)
+    this.flipper = this.el(constants.FLIPPERQUERY)
+    this.switchBtn = this.el(constants.SWITCHQUERY)
+
+    this.switchBtn.addEventListener('click', () => {
+      this.flipper.scrollTop = 0
+      this.flipper.scrollLeft = 0
+      this.flipper.classList.toggle("-switch")
+    })
+
     return this
+  }
+
+  async retrieve () {
   }
 
   listeners() {
@@ -54,8 +70,7 @@ export class Controller extends Util {
     switch (type) {
       case constants.CATTYPE:
         const category = target.getAttribute("data-category")
-        const superblock = target.getAttribute("data-superblock")
-        this.superblockMap = this.superblocks.find(sb => sb.name === superblock) as iSuperblock
+        const superblock = target.getAttribute("data-superblock") 
         this.updateProductFloor(category as string)
         break;
       case constants.DIRBTN:
@@ -70,9 +85,17 @@ export class Controller extends Util {
       case constants.SEEALL:
         const url = target.getAttribute("data-href")
         location.href = url as string
+        break;
+      case constants.COMPARE:
+        const sku = target.getAttribute("data-sku") 
+        break;
       default:
         break;
     }
+
+  }
+
+  singularName(name: string) {
 
   }
   
@@ -88,76 +111,77 @@ export class Controller extends Util {
     scrollable.scrollLeft = start + delta * 1;
   } 
 
-  buildSuperblock(superblock: iSuperblock) {
-    let superblockHtml = `<div class="-superblock" data-name="${superblock.name}">`
-    const title = `<div class="-title" style="background-color: ${superblock.lightShade};">${superblock.name}</div>`
-    const freelinks = this.buildFreelinks(superblock.categories, superblock)
-    const productFloor = this.buildProductFloor(superblock)
+  buildSuperblock(categories: iCategory[]) {
+    let superblockHtml = `<div class="-superblock" data-name="bestsellers">`
+    const title = `<div class="-title"><span>bestsellers</span><button class="-switcher">switch</button></div>`
+    const freelinks = this.buildFreelinks(categories)
+    const productFloor = this.buildProductFloor(categories[0])
 
-    superblockHtml += superblock.categories.length >= 1 ? title : ""
+    superblockHtml += title
     superblockHtml += freelinks
     superblockHtml += productFloor
     superblockHtml += '</div>'
     
-    return superblock.skus.length >= 7 ? superblockHtml : ""
+    return superblockHtml
   }
 
   updateProductFloor(category: string) {
-    const superblockEl = this.el(`.-superblock[data-name="${this.superblockMap?.name}"]`)
-    const productFloor = this.el(".-productfloor", superblockEl)
-    const productFloorTitle = this.el(".-productfloor .-title", superblockEl)
-    const productFloorSeeAll = this.el(".-see-all-clickable", superblockEl)
+    const productFloor = this.el(".-productfloor")
+    const productFloorTitle = this.el(".-productfloor .-title")
+    const productFloorSeeAll = this.el(".-see-all-clickable")
 
-    const catObj = this.superblockMap?.categories.find(cat => cat.name === category)
+    const catObj = this.categories.find(cat => cat.plural_name === category)
 
-    productFloorTitle.innerHTML = `<div class="-title-name">${category}</div><div class="-title-desc">${catObj?.price_point}</div>`
+    productFloorTitle.innerHTML = `<div class="-title-name">${category}</div><div class="-title-desc">${this.formatPrice(catObj?.price_point as string)}</div>`
     
     productFloorSeeAll.setAttribute("data-href", catObj?.url as string)
 
     const actual = this.el(".-skus.-actual", productFloor)
 
-    actual.innerHTML = `<div class="-product-scrollable">${catObj?.skus.slice(0,16).map(this.skuHtml.bind(this)).join("")}</div>`
+    const skus = catObj?.skus.slice(0,16).map((sku: iSKU) => this.skuHtml(sku, catObj)).join("")
+
+    actual.innerHTML = `<div class="-product-scrollable">${skus}</div>`
     this.show()
   }
 
-  buildFreelinks(categories: iCategory[], superblock: iSuperblock) {
-    let catHtml = '<div class="-cats -posrel -single">'
-    const freelinks = categories.map(category => this.catHtml(category, superblock))
+  buildFreelinks(categories: iCategory[]) {
+    let catHtml = '<div class="-cats -posrel -single -flipper">'
+    const freelinks = categories.map(category => this.catHtml(category))
     .join("")
-    catHtml += categories.length > 0 ? `<div class="-scrollable">${freelinks}</div>` : ""
+    catHtml += categories.length > 0 ? `<div class="-scrollable -front">${freelinks}</div><div class="-back"><div class="-sku -posrel -available" data-sku="FL585EA0I41P9NAFAMZ"><a href="https://www.jumia.com.ng/floveme-power-banks-20000-mah-utra-slim-portable-fast-charger-71912403.html" target="_blank" class="-img -posrel"><span class="-posabs -preloader -hide"></span><div class="-posabs -shadow"><span class="-posabs">voted</span></div><img class="lazy-image loaded" data-src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/30/421917/1.jpg?6054" alt="sku_img" src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/30/421917/1.jpg?6054"></a><div class="-details"><div class="-name">Floveme Power Banks 20000 MAh Utra Slim Portable Fast Charger</div><div class="-prices"><div class="-price -new">₦ 8,690</div><div class="-price -old">₦ 15,686</div><div class="-discount">-45%</div></div></div></div><div class="-sku -posrel -available" data-sku="FL585EA0I41P9NAFAMZ"><a href="https://www.jumia.com.ng/floveme-power-banks-20000-mah-utra-slim-portable-fast-charger-71912403.html" target="_blank" class="-img -posrel"><span class="-posabs -preloader -hide"></span><div class="-posabs -shadow"><span class="-posabs">voted</span></div><img class="lazy-image loaded" data-src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/30/421917/1.jpg?6054" alt="sku_img" src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/30/421917/1.jpg?6054"></a><div class="-details"><div class="-name">Floveme Power Banks 20000 MAh Utra Slim Portable Fast Charger</div><div class="-prices"><div class="-price -new">₦ 8,690</div><div class="-price -old">₦ 15,686</div><div class="-discount">-45%</div></div></div></div><div class="-sku -posrel -available" data-sku="FL585EA0I41P9NAFAMZ"><a href="https://www.jumia.com.ng/floveme-power-banks-20000-mah-utra-slim-portable-fast-charger-71912403.html" target="_blank" class="-img -posrel"><span class="-posabs -preloader -hide"></span><div class="-posabs -shadow"><span class="-posabs">voted</span></div><img class="lazy-image loaded" data-src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/30/421917/1.jpg?6054" alt="sku_img" src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/30/421917/1.jpg?6054"></a><div class="-details"><div class="-name">Floveme Power Banks 20000 MAh Utra Slim Portable Fast Charger</div><div class="-prices"><div class="-price -new">₦ 8,690</div><div class="-price -old">₦ 15,686</div><div class="-discount">-45%</div></div></div></div></div>` : ""
     catHtml += '</div>'
     return catHtml
   }
 
-  catHtml(category: iCategory, superblock: iSuperblock) {
-    this.superblockMap = superblock
-    return `<div class="-cat -posrel" data-category="${category.name}" data-url="${category.url}" style="background-color: ${superblock.lightShade}"><span class="-posabs -preloader -loading"></span><div class="-clickable -posabs" data-type="category" data-superblock="${superblock.name}"  data-category="${category.name}"></div><span class="-posabs -preloader -loading" data-type="category"></span><img class="lazy-image" data-src="${category.image}" alt="${category.name}" /><div class="-posabs -name"><div class="-txt -posabs -name-el">${category.name}</div><div class="-bg -posabs -name-el" style="background-color:${superblock.darkShade}dd;color:white"></div></div><div class="-price-point">${this.formatPrice(category.price_point)}</div></div>`
+  catHtml(category: iCategory) {
+    return `<div class="-cat -posrel" data-category="${category.plural_name}" data-url="${category.url}" ><span class="-posabs -preloader -loading"></span><div class="-clickable -posabs" data-type="category" data-category="${category.plural_name}"></div><span class="-posabs -preloader -loading" data-type="category"></span><img class="lazy-image" data-src="${category.image}" alt="${category.plural_name}" /><div class="-posabs -name"><div class="-txt -posabs -name-el">${category.plural_name}</div><div class="-bg -posabs -name-el"></div></div><div class="-price-point">${this.formatPrice(category.price_point)}</div></div>`
   }
 
-  buildProductFloor(superblock: iSuperblock) {
+  buildProductFloor(category: iCategory) {
     const prevNextButtons = this.isMobile ? '' : '<div class="-control -prev -posabs" data-dir="prev" data-type="dir-btn"><span class="-posabs -preloader -loading"></span></div><div class="-control -next -posabs"  data-type="dir-btn" data-dir="next"><span class="-posabs -preloader -loading"></span></div>'
 
-    let html = `<div class="-productfloor active -posrel" data-name="${superblock.name}">${prevNextButtons}`
+    let html = `<div class="-productfloor active -posrel" data-name="${category.plural_name}">${prevNextButtons}`
 
-    html += `<div class="-head" style="background-color:${superblock.lightShade}"><div class="-title"><div class="-title-name">${superblock.name}</div><div class="-title-desc">top deals</div></div><div class="-see-all"><span class="-see-all-clickable"  data-href="${superblock.url}" data-type="see all"></span><span class="-txt">See all</span><span class="-arrow" style="border: 2px solid black"></span></div></div>`
+    html += `<div class="-head"><div class="-title"><div class="-title-name">${category.plural_name}</div><div class="-title-desc">top deals</div></div><div class="-see-all"><span class="-see-all-clickable"  data-href="${category.url}" data-type="see all"></span><span class="-txt">See all</span><span class="-arrow" style="border: 2px solid black"></span></div></div>`
 
-    html += `<div class="-skus -actual"><div class="-product-scrollable">${superblock.skus.slice(0,16).map(this.skuHtml.bind(this)).join("")}</div></div>`
+    const skus = category.skus.slice(0,16).map((sku: iSKU) => this.skuHtml(sku, category)).join("")
+
+    html += `<div class="-skus -actual"><div class="-product-scrollable">${skus}</div></div>`
 
     html += "</div>"
     return html
   }
 
-  skuHtml(skuObj: iSKU) {
+  skuHtml(skuObj: iSKU, category: iCategory) {
     const {
       sku, displayName,
-      url, prices: { oldPrice, price, discount },
+      url, prices: { price, discount },
       image
     } = skuObj
     const discountHtml = discount ? `<div class="-discount -posabs">${discount}</div>` : ""
-    const oldPriceHtml = discount ? `<div class="-oldPrice">${oldPrice}</div>` : ""
 
     return `
-    <a href="${url}" data-sku="${sku}" class="-posrel -sku"><div class="-img -posrel"><span class="-posabs -preloader -loading"></span><img class="lazy-image" data-src="${image}" alt="${displayName}"/></div>${discountHtml} <div class="-details"><div class="-name">${displayName}</div><div class="-newPrice">${price}</div>${oldPriceHtml}</div></a>
+    <div data-sku="${sku}" class="-posrel -sku"><a href="${url}" class="-img -posrel"><span class="-posabs -preloader -loading"></span><img class="lazy-image" data-src="${image}" alt="${displayName}" /></a>${discountHtml} <div class="-details"><div class="-name">${displayName}</div><div class="-newPrice">${price}</div><div class="-atc-compare"><a href="${url}" class="-cta -atc">Add to cart</a><a href="#initiative" class="-cta -compare" data-sku="${sku}" data-singular-name="${category.singular_name}" data-type="compare">Compare</a></div></div></div>
     `
   }
 

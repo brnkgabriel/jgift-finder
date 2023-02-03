@@ -21,8 +21,8 @@ export const gfConfig: IDBConfig = {
 }
 
 export const constants = {
-  GIFTFINDERCOLLECTION: "giftfinder",
-  GIFTFINDERDOCSEVENT: "gift finder docs event",
+  COLLECTION: "productcomparator",
+  DOCSEVENT: "docs event",
   ABOUT: "about",
   CONFIG: "config",
   SEEALL: "see all",
@@ -40,11 +40,15 @@ export const constants = {
   TIMESLOTSTODISPLAY: 12,
   SKUROWQUERY: ".-sku_row",
   MAINELQUERY: ".-main-el",
+  FLIPPERQUERY: ".-flipper",
+  SWITCHQUERY: ".-switcher",
+  CONTAINERQUERY: ".-container",
   LIVECLASS: "-live",
   OOSCLASS: "-oos",
   TABCLASS: "-tab",
   CATTYPE: "category",
   DIRBTN: "dir-btn",
+  COMPARE: "compare",
   AM: "am",
   PM: "pm",
   TODAY: "today",

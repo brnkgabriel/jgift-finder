@@ -17,7 +17,8 @@ export interface iConfig {
 export interface iCategory {
   approved: string;
   image: string;
-  name: string;
+  singular_name: string;
+  plural_name: string;
   price_point: string;
   sku_count: string;
   skus: iSKU[],
@@ -59,7 +60,7 @@ export interface iDynamicObject {
 export interface iRemoteData {
   about?: iAbout[];
   config?: iConfig;
-  superblocks?: iSuperblock[]
+  categories?: iCategory[]
 }
 
 export interface iCatMap {
