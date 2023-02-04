@@ -11,17 +11,12 @@ export class Util {
   private timeInterval:number = 0;
   private currency: string;
   private config: iConfig;
-  private domain: string;
+  protected domain: string;
+  protected catalog: string;
   protected el;
   protected all;
   private pad;
-  private skuRow;
-  // private skuRows;
-  private tab;
-  private live;
-  private skuID;
   private capitalize;
-  private digit;
   protected isATab;
   private midnight;
   protected fbox;
@@ -32,18 +27,13 @@ export class Util {
     this.currency = (this.remoteData.config as iConfig).currency
     this.config = this.remoteData.config as iConfig
     this.domain = this.remoteData.config?.domain as string
+    this.catalog = `${this.domain}/catalog/?shipped_from=country_local&seller_score=3-5&q=`
     this.fbox = fbox
 
     this.el = (query: string, parent?: HTMLElement) => parent ? parent.querySelector(fxn.idQuery(query)) as HTMLElement : document.querySelector(fxn.idQuery(query)) as HTMLElement
     this.all = (query: string, parent?: HTMLElement) => parent ? parent.querySelectorAll(fxn.idQuery(query)) : document.querySelectorAll(fxn.idQuery(query))
     this.pad = (time: number) => time.toString().length == 1 ? "0" + time : time
-    this.skuRow = (time: number) => this.el(fxn.timeQuery(time))
-    // this.skuRows = () => this.all(constants.SKUROWQUERY)
-    this.tab = (time: number) => this.el(fxn.tabQuery(time))
-    this.live = (list: HTMLElement[], action: "add" | "remove") => list.forEach(each => each.classList[action](constants.LIVECLASS))
-    this.skuID = (sku: ICampaignCalendar) => sku.name + "-" + (+new Date(sku.time))
     this.capitalize = (str: string) => str[0].toUpperCase() + str.slice(1)
-    this.digit = (num: number, unit: string) => num !== 0 ? this.pad(num) + unit : ""
     this.isATab = (el: HTMLElement) => el.classList.contains(constants.TABCLASS) 
     this.midnight = (time: number | string) => +new Date(time).setHours(0, 0, 0, 0)
   }

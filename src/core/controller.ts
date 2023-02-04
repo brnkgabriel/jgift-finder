@@ -1,3 +1,4 @@
+import { Api } from "./api";
 import { constants } from "./constants";
 import { iAbout, iCategory, iDynamicObject, iNames, iRemoteData, iSKU, iSuperblock } from "./types/index";
 import { Util } from "./util";
@@ -13,10 +14,12 @@ export class Controller extends Util {
   private flipper: HTMLElement
   private switchBtn: HTMLElement
   private selection: HTMLElement
+  private api: Api
 
   constructor(remoteData: iRemoteData, fbox: any) {
     super(remoteData, fbox)
 
+    this.api = new Api(remoteData, fbox)
     this.tandcs = remoteData.about as iAbout[]
     this.categories = remoteData.categories as iCategory[]
     this.productMap = []
@@ -110,6 +113,10 @@ export class Controller extends Util {
 
     !sfxn.contains("-switch") && sfxn.add("-switch")
     !fFxn.contains("-switch") && fFxn.add("-switch")
+
+    const url = this.catalog + selection.singularName
+    this.api.products(url)
+    .then(data => console.log("data is", data))
   }
 
   selectionObject(target: HTMLElement) {
@@ -118,6 +125,7 @@ export class Controller extends Util {
     const skuObj = this.productMap?.find((product: iSKU) => product.sku === sku) as iSKU
     const names: iNames = { displayName: skuObj.displayName, singularName }
     skuObj.properties = this.productProperties(names)
+    skuObj.singularName = singularName
     return skuObj
   }
 

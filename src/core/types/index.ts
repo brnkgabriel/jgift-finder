@@ -41,7 +41,8 @@ export interface iSKU {
   prices: iPrice;
   sku: string;
   url: string;
-  properties?: string[]
+  properties?: string[];
+  singularName?: string;
 }
 
 export interface iSuperblock {
