@@ -127,7 +127,6 @@ body {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 121px;
 }
 #initiative .-banner img {
   border-radius: 4px;
@@ -201,11 +200,7 @@ body {
   transform: translate(-50%,-50%) rotate(-135deg);
 }
 
-/* category freelinks */
-
-.-cats {
-  
-}
+/* category freelinks */ 
 
 .-flipper {
   height: 320px;
@@ -251,9 +246,6 @@ body {
   overflow-y: auto;
 }
 
-.-selection .-back {
-  overflow: hidden;
-}
 
 .-switch .-back {
   opacity: 1;
@@ -262,28 +254,57 @@ body {
 }
 
 .-back .-sku {
-  height: 40vw;
-  max-height: 192px;
-  display: flex;
-  box-shadow: var(--box-shadow);
-  border-radius: 4px;
-  background-color: white;
-  margin: 8px 0;
-}
-
-.-selection .-back .-sku {
-  margin: unset;
-  height: 100%;
-}
-
-.-back .-sku .-img {
   
 }
 
-.-back .-sku .-img img {
-  width: 40vw;
-  max-width: 192px;
+.-selection .-back {
+  overflow: hidden;
+  background-color: var(--light-blue);
 }
+
+.-back .-sku {
+  width: 100%;
+  height:  calc(40vw - 16px);
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  background: white;
+  border-radius: 4px;
+  margin: 8px 0;
+  box-shadow: var(--box-shadow);
+}
+
+.-selection .-back .-sku {
+  height: 100%;
+  margin: unset !important;
+  box-shadow: unset !important;
+}
+
+@media screen and (min-width: 480px) {
+  
+  .-back .-sku .-details {
+    width: 288px !important;
+  }
+}
+
+.-back .-sku .-img {
+  width: calc(40vw - 16px) !important;
+  max-width: 176px;
+}
+
+.-back .-sku .-img img {
+  width: 100%;
+}
+
+.-back .-sku .-details {
+  width: calc(100% - (40vw - 16px));
+  max-width: 288px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 
 .-back .-sku .-details {
   font-size: .8em;
@@ -370,11 +391,7 @@ body {
   width: 100%;
 }
 
-/* product floors */
-
-.-superblock .-productfloor {
-
-}
+/* product floors */ 
 
 .-superblock .-productfloor .-head {
   display: flex;
@@ -492,13 +509,6 @@ body {
   padding: 8px;
 }
 
-.-selection .-sku .-details {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 60vw;
-  max-width: calc(100% - 192px);
-}
 
 .-sku .-details .-name {
   white-space: initial;
@@ -589,7 +599,6 @@ body {
   transform: translateX(0%);
   height: 100%;
   z-index: 1;
-  border: 8px solid white;
 }
 #initiative .-banner.-show .-rules_eligibility {
   transform: translateX(-100%);
