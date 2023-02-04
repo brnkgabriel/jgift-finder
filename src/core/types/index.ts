@@ -41,6 +41,7 @@ export interface iSKU {
   prices: iPrice;
   sku: string;
   url: string;
+  properties?: string[]
 }
 
 export interface iSuperblock {
@@ -65,4 +66,9 @@ export interface iRemoteData {
 
 export interface iCatMap {
   category: iCategory
+}
+
+export interface iNames {
+  displayName: string;
+  singularName: string;
 }

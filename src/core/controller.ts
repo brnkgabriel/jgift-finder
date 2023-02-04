@@ -1,5 +1,5 @@
 import { constants } from "./constants";
-import { iAbout, iCategory, iDynamicObject, iRemoteData, iSKU, iSuperblock } from "./types/index";
+import { iAbout, iCategory, iDynamicObject, iNames, iRemoteData, iSKU, iSuperblock } from "./types/index";
 import { Util } from "./util";
 
 export class Controller extends Util {
@@ -9,16 +9,17 @@ export class Controller extends Util {
   private topBanner: HTMLElement
   private mainEl: HTMLElement
   private categories: iCategory[]
-  private map?: iCategory
+  private productMap?: iSKU[]
   private flipper: HTMLElement
   private switchBtn: HTMLElement
+  private selection: HTMLElement
 
   constructor(remoteData: iRemoteData, fbox: any) {
     super(remoteData, fbox)
 
     this.tandcs = remoteData.about as iAbout[]
     this.categories = remoteData.categories as iCategory[]
-    this.map = undefined
+    this.productMap = []
 
     this.tandcsEl = this.el(constants.TANDCSQUERY)
     this.hiwCTA = this.el(constants.HOWITWORKSQUERY)
@@ -26,6 +27,7 @@ export class Controller extends Util {
     this.mainEl = this.el(constants.MAINELQUERY)
     this.flipper = this.el(constants.FLIPPERQUERY)
     this.switchBtn = this.el(constants.SWITCHQUERY)
+    this.selection = this.el(constants.SELECTIONQUERY)
 
     this.hiwCTA.addEventListener(constants.CLICK, this.toggleBanner.bind(this))
 
@@ -70,7 +72,6 @@ export class Controller extends Util {
     switch (type) {
       case constants.CATTYPE:
         const category = target.getAttribute("data-category")
-        const superblock = target.getAttribute("data-superblock") 
         this.updateProductFloor(category as string)
         break;
       case constants.DIRBTN:
@@ -87,7 +88,7 @@ export class Controller extends Util {
         location.href = url as string
         break;
       case constants.COMPARE:
-        const sku = target.getAttribute("data-sku") 
+        this.updateSelection(target)
         break;
       default:
         break;
@@ -95,9 +96,40 @@ export class Controller extends Util {
 
   }
 
-  singularName(name: string) {
+  updateSelection(target: HTMLElement) {
+    const selection = this.selectionObject(target)
+    const html = this.selectionHtml(selection)
 
+    const back = this.el(".-back", this.selection)
+    back.innerHTML = html
+
+    this.show()
+    
+    const fxn = this.selection.classList
+
+    !fxn.contains("-switch") && fxn.add("-switch")
   }
+
+  selectionObject(target: HTMLElement) {
+    const singularName = (target.getAttribute("data-singular-name") as string).toLowerCase()
+    const sku = target.getAttribute("data-sku")
+    const skuObj = this.productMap?.find((product: iSKU) => product.sku === sku) as iSKU
+    const names: iNames = { displayName: skuObj.displayName, singularName }
+    skuObj.properties = this.productProperties(names)
+    return skuObj
+  }
+
+  selectionHtml (selection: iSKU) {
+
+    const btnHtml = selection.properties?.map(this.btnHtml.bind(this)).join("")
+    
+    return `<div class="-sku -posrel" data-sku="${selection.sku}"><a href="${selection.url}" target="_blank" class="-img -posrel"><span class="-posabs -preloader -hide"></span><img class="lazy-image" data-src="${selection.image}" alt="sku_img"></a><div class="-details"><div class="-name">${selection.displayName}</div><div class="-prices"><div class="-price -new">${selection.prices.price}</div><div class="-price -old">${selection.prices.oldPrice}</div><div class="-discount">${selection.prices.discount}</div></div><div class="-btns">${btnHtml}</div></div></div>`
+  }
+
+  btnHtml(name: string) {
+    return `<div class="-btn -cta -posrel"><div class="-btn-clickable -posabs" data-name="${name}" data-type="selection-btn"></div><div class="-txt">${name}</div></div>`
+  }
+
   
   scrollTonext(scrollable: HTMLElement) {
     var start = scrollable.scrollLeft + 80, end = scrollable.scrollLeft + 300
@@ -139,6 +171,7 @@ export class Controller extends Util {
     const actual = this.el(".-skus.-actual", productFloor)
 
     const skus = catObj?.skus.slice(0,16).map((sku: iSKU) => this.skuHtml(sku, catObj)).join("")
+    this.productMap = catObj?.skus
 
     actual.innerHTML = `<div class="-product-scrollable">${skus}</div>`
     this.show()
@@ -165,6 +198,7 @@ export class Controller extends Util {
     html += `<div class="-head"><div class="-title"><div class="-title-name">${category.plural_name}</div><div class="-title-desc">top deals</div></div><div class="-see-all"><span class="-see-all-clickable"  data-href="${category.url}" data-type="see all"></span><span class="-txt">See all</span><span class="-arrow" style="border: 2px solid black"></span></div></div>`
 
     const skus = category.skus.slice(0,16).map((sku: iSKU) => this.skuHtml(sku, category)).join("")
+    this.productMap = category.skus
 
     html += `<div class="-skus -actual"><div class="-product-scrollable">${skus}</div></div>`
 

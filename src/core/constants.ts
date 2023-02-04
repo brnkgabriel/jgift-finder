@@ -42,6 +42,7 @@ export const constants = {
   MAINELQUERY: ".-main-el",
   FLIPPERQUERY: ".-flipper",
   SWITCHQUERY: ".-switcher",
+  SELECTIONQUERY: ".-selection",
   CONTAINERQUERY: ".-container",
   LIVECLASS: "-live",
   OOSCLASS: "-oos",
@@ -70,6 +71,7 @@ export const constants = {
   TERMSANDCONDIIONS: "Terms & Conditions",
   BANNERQUERY: ".-banner.-top img.lazy-image",
   DATASRC: "data-src",
+  KEYWORDS: ["with", "and", "tv"],
 
   // Tabs class constants
   TABQUERY: ".-tab",

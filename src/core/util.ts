@@ -2,7 +2,7 @@ import { IDomain, IRemoteConfig } from "./interfaces/config";
 import { IPastAndFutureTimes } from "./interfaces/others";
 import { constants, fxn } from "./constants";
 import { ICampaignCalendar } from "./interfaces/data";
-import { iConfig, iDynamicObject, iRemoteData } from "./types/index";
+import { iConfig, iDynamicObject, iNames, iRemoteData } from "./types/index";
 
 // type TypeOrNull<T> = T | null;
 
@@ -179,5 +179,22 @@ export class Util {
     const banner = isMobile ? mBanner : dBanner
     
     return { banner }
+  }
+
+  productProperties(name: iNames) {
+    const names = name.displayName.split(" ") as string[]
+    const len = names?.length as number
+    const properties = []
+    for (let i = 0; i < len; i++) {
+      const word = names[i].toLowerCase()
+      if (word.length < 2) continue
+      if (name.singularName.indexOf(word) > -1) continue
+      if (constants.KEYWORDS.indexOf(word) > -1) continue
+
+      const property = word.trim().replace(")", "").replace("(", "")
+      properties.push(property)
+    }
+
+    return properties
   }
 }
