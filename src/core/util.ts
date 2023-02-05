@@ -152,7 +152,6 @@ export class Util {
 
   show() {
     let imageObserver = new this.fbox.ImageObserver()
-    console.log("featurebox is", this.fbox)
     imageObserver = null
     return this
   }
@@ -169,6 +168,10 @@ export class Util {
     const banner = isMobile ? mBanner : dBanner
     
     return { banner }
+  }
+
+  rating(average: number) {
+    return ((average / 5) * 100).toFixed(2) + '%'
   }
 
   productProperties(name: iNames) {

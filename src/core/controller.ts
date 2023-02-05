@@ -11,6 +11,7 @@ export class Controller extends Util {
   private mainEl: HTMLElement
   private categories: iCategory[]
   private productMap?: iSKU[]
+  private filters: string[]
   private flipper: HTMLElement
   private flipperBack: HTMLElement
   private superblockTitle: HTMLElement
@@ -25,6 +26,7 @@ export class Controller extends Util {
     this.tandcs = remoteData.about as iAbout[]
     this.categories = remoteData.categories as iCategory[]
     this.productMap = []
+    this.filters = []
 
     this.tandcsEl = this.el(constants.TANDCSQUERY)
     this.hiwCTA = this.el(constants.HOWITWORKSQUERY)
@@ -56,7 +58,7 @@ export class Controller extends Util {
     this.superblockTitle = this.el(constants.SUPERBLOCKTITLEQUERY)
 
     this.switchBtn.addEventListener('click', () => {
-      this.flipper.classList.toggle("-switch")
+      [this.selection, this.flipper].forEach((el: HTMLElement) => el.classList.toggle("-switch"))
       this.positionAndUpdateAfterFlip()
     })
 
@@ -72,6 +74,7 @@ export class Controller extends Util {
 
   listeners() {
     this.mainEl.addEventListener("click", this.handleClick.bind(this))
+    this.topBanner.addEventListener("click", this.handleClick.bind(this))
   }
 
   handleClick(evt: Event) {
@@ -88,7 +91,6 @@ export class Controller extends Util {
         const direction = target.getAttribute("data-dir")
         const productfloor = target.parentElement
         const scrollale = this.el(".-product-scrollable", productfloor as HTMLElement).parentElement
-        console.log("scrollable", scrollale, "direction", direction)
         direction === constants.NEXT
         ? this.scrollTonext(scrollale as HTMLElement)
         : this.scrollToprev(scrollale as HTMLElement)
@@ -100,27 +102,59 @@ export class Controller extends Util {
       case constants.COMPARE:
         this.updateSelection(target)
         break;
+      case constants.SELECTIONBTN:
+        this.btnFilterUpdate(target)
+        break;
       default:
         break;
     }
 
   }
 
+  btnFilterUpdate(target: HTMLElement) {
+    const propName = target.getAttribute("data-name")
+    const btn = target.parentElement
+    btn?.classList.toggle("active")
+
+    if (btn?.classList.contains("active")) {
+      this.filters.unshift(propName as string)
+    } else {
+      let str = this.filters.join("-")
+      str = str.replace(propName as string, "")
+      const pieces = str.split("-").filter((word: string) => word !== "")
+      this.filters = pieces
+    }
+
+    this.apiRequest()
+  }
+
   updateSelection(target: HTMLElement) {
     const selection = this.selectionObject(target)
-    const html = this.selectionHtml(selection)
 
+    this.updateFilters(selection.singularName as string)
+    this.updateSelectionUi(selection)
+    this.flipAndPopulateSimilarProducts(selection)
+  }
+
+  updateFilters(name: string) {
+    this.filters = [ name ]
+  }
+
+  updateSelectionUi(selection: iSKU) {
+    const html = this.selectionHtml(selection)
     const back = this.el(".-back", this.selection)
     back.innerHTML = html
-
     this.show()
-    
-    this.flipAndPopulateSimilarProducts(selection)
   }
 
   flipAndPopulateSimilarProducts(selection: iSKU) {
     this.flipSimilarProducts(selection)
-    const url = this.catalog + selection.singularName
+    this.apiRequest()
+  }
+
+  apiRequest() {
+    this.flipperBack.innerHTML = this.spinLoader()
+    const url = this.catalog + this.filters.join("+")
     this.api.products(url)
     .then(this.populateSimilarProducts.bind(this))
   }
@@ -133,10 +167,10 @@ export class Controller extends Util {
     !fFxn.contains("-switch") && fFxn.add("-switch")
     
     this.positionAndUpdateAfterFlip(selection.pluralName)
-    this.flipperBack.innerHTML = this.spinLoader()
   }
 
   populateSimilarProducts(data: iSKU[]) {
+    console.log("data", data)
     this.flipperBack.innerHTML = data.map(this.skuHtmlHorizontal.bind(this)).join("")
     this.show()
   }
@@ -184,7 +218,7 @@ export class Controller extends Util {
 
   buildSuperblock(categories: iCategory[]) {
     let superblockHtml = `<div class="-superblock" data-name="selection">`
-    const title = `<div class="-title"><span class="-similar-products">Categories</span><button class="-switcher">switch</button></div>`
+    const title = `<div class="-title"><span class="-similar-products">Categories</span><button class="-switcher -cta">switch</button></div>`
     const freelinks = this.buildFreelinks(categories)
     const productFloor = this.buildProductFloor(categories[0])
 
@@ -250,9 +284,15 @@ export class Controller extends Util {
   }
 
   skuHtmlHorizontal(sku: iSKU) {
+
+    const express = sku.isShopExpress ? '<div class="-express -list -posrel"><express></express></div>' : ''
+    const officialStore = sku.badges?.main ? '<span class="-badge -main -official-store">Official Store</span>' : ''
+
+    const rating = sku.rating ? `<div class="-product_rating"><div class="-stars -radio-el -posrel -inlineblock -vamiddle"><div class="-in" style="width:${this.rating(sku.rating.average)}"></div></div><div class="-count -inlineblock -vabaseline -posrel"><div class="-rt">(${sku.rating.totalRatings})</div></div></div>` : ''
     
     const oldPriceAndDiscount = sku.prices.oldPrice ? this.oldPriceAndDiscount(sku) : ""
-    return `<div class="-sku -posrel -available" data-sku="${sku.sku}"><a href="${sku.url}" target="_blank" class="-img -posrel"><span class="-posabs -preloader -hide"></span><img class="lazy-image loaded" data-src="${sku.image}" alt="sku_img" /></a><div class="-details"><div class="-name">${sku.displayName}</div><div class="-prices"><div class="-price -new">${sku.prices.price}</div>${oldPriceAndDiscount} </div></div></div>`
+
+    return `<div class="-sku -posrel -available" data-sku="${sku.sku}"><a href="${sku.url}" target="_blank" class="-img -posrel"><span class="-posabs -preloader -hide"></span><img class="lazy-image loaded" data-src="${sku.image}" alt="sku_img" /></a><div class="-details"><div class="-name">${sku.displayName}</div><div class="-features">${express} ${officialStore} ${rating} </div><div class="-prices"><div class="-price -new">${sku.prices.price}</div>${oldPriceAndDiscount} </div></div></div>`
   }
 
   skuHtml(skuObj: iSKU, category: iCategory) {
@@ -261,10 +301,10 @@ export class Controller extends Util {
       url, prices: { price, discount },
       image
     } = skuObj
-    const discountHtml = discount ? `<div class="-discount -posabs">${discount}</div>` : ""
+    const discountHtml = discount ? `<div class="-discount">${discount}</div>` : ""
 
     return `
-    <div data-sku="${sku}" class="-posrel -sku"><a href="${url}" class="-img -posrel"><span class="-posabs -preloader -loading"></span><img class="lazy-image" data-src="${image}" alt="${displayName}" /></a>${discountHtml} <div class="-details"><div class="-name">${displayName}</div><div class="-newPrice">${price}</div><div class="-atc-compare"><a href="${url}" class="-cta -atc">Add to cart</a><a href="#initiative" class="-cta -compare" data-sku="${sku}" data-singular-name="${category.singular_name}" data-plural-name="${category.plural_name}" data-type="compare">Compare</a></div></div></div>
+    <div data-sku="${sku}" class="-posrel -sku"><div class="-atc-compare"><a href="#initiative" class="-cta -compare" data-sku="${sku}" data-singular-name="${category.singular_name}" data-plural-name="${category.plural_name}" data-type="compare">Compare</a></div><a href="${url}" class="-img -posrel"><span class="-posabs -preloader -loading"></span><img class="lazy-image" data-src="${image}" alt="${displayName}" /></a><div class="-details"><div class="-name">${displayName}</div><div class="-prices"><div class="-newPrice">${price}</div>${discountHtml} </div><div class="-atc-compare"><a href="${url}" class="-cta -atc">Add to cart</a></div></div></div>
     `
   }
 

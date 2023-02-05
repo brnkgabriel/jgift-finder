@@ -76,6 +76,14 @@ body {
   text-transform: capitalize;
 }
 
+.-superblock .-switcher {
+  border: unset;
+  width: unset !important;
+  height: unset !important;
+  border-radius: 50px;
+  background-color: var(--dark-blue);
+}
+
 #initiative.-container a:not(.-product):not(.-freelink) {
   color: var(--font-color);
   vertical-align: baseline;
@@ -547,6 +555,25 @@ body {
   font-size: small;
 }
 
+.-sku .-details .-features {
+  display: flex;
+  flex-direction: column;
+  row-gap: 2px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.-sku .-details .-features .-express {
+  width: 100%;
+}
+.-sku .-details .-features .-official-store {
+  font-size: 0.7em;
+  font-weight: 500;
+  padding: 4px;
+  letter-spacing: 1px;
+  border-radius: 4px;
+}
+
 .-sku .-details .-newPrice {
   font-weight: 500;
   white-space: nowrap;
@@ -598,12 +625,25 @@ body {
   color: var(--dark-blue);
 }
 
+.-sku .-details .-btn.active {
+  background-color: var(--dark-blue);
+  color: white;
+}
+
+.-sku .-details .-btn .-btn-clickable {
+  width: 100%;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}
+
 .-atc-compare {
   display: flex;
   flex-direction: column;
   width: 100%;
   row-gap: 4px;
-  margin-top: 8px;
+  margin: 8px 0px;
 }
 
 .-atc, .-compare {

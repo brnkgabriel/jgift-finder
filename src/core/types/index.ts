@@ -35,11 +35,58 @@ export interface iPrice {
   taxEuro?: string;
 }
 
-export interface iSKU {
-  displayName: string;
+export interface iCampaign {
+  identifier: string;
   image: string;
+  name: string;
+  url: string;
+}
+
+export interface iMain {
+  identifier: string;
+  name: string;
+  url: string;
+}
+
+export interface iBadge {
+  main?: iMain;
+  campaign?: iCampaign
+}
+
+export interface iRating {
+  average: number;
+  totalRatings: number;
+}
+
+export interface iExpress {
+  title: string;
+}
+
+export interface iSimple {
+  isBuyable: boolean;
+  loginUrl: string;
+  name: string;
   prices: iPrice;
   sku: string;
+}
+
+export interface iSKU {
+  badges?: iBadge;
+  brand?: string;
+  categories?: string;
+  displayName: string;
+  image: string;
+  isBuyable?: boolean;
+  isShopExpress?: boolean;
+  name?: string;
+  prices: iPrice;
+  rating?: iRating;
+  selectedVariation?: string;
+  sellerId?: number;
+  shopExpress?: iExpress;
+  simples?: iSimple[];
+  sku: string;
+  tags: string;
   url: string;
   properties?: string[];
   singularName?: string;
