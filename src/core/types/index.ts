@@ -121,3 +121,10 @@ export interface iNames {
   displayName: string;
   singularName: string;
 }
+
+export interface iProductFloorOptions {
+  skus: iSKU[],
+  catObj: iCategory,
+  name: string,
+  desc: string
+}

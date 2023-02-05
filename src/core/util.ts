@@ -193,4 +193,12 @@ export class Util {
   randomize(list:any[]) {
     return [...list].sort(() => Math.random() - 0.5)
   }
+  pluralize(str: string) {
+    const lastCharacter = str[str.length - 1]
+    switch (lastCharacter) {
+      case 'y': return str.substring(0, str.length - 1) + 'ies'
+      case 's': return str
+      default: return str + 's'
+    }
+  }
 }

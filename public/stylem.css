@@ -17,6 +17,7 @@
   --font-color: #282828;
   --light-blue: #C3DEF0;
   --dark-blue: #0040CEaa;
+  --dark-blue-wo-opacity: #0040ce;
   --barred-price: #75757a;
   --jumia-cta: #f68b1e;
   --discount-bg: #feefde;
@@ -53,6 +54,23 @@ body {
   color: var(--font-color);
 }
 
+.-container input:not([type="radio"]), .-container textarea, .-container select {
+  background-color: white;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px 0 rgba(60,64,67,.30),0 1px 3px 1px rgba(60,64,67,.15);
+  box-sizing: border-box;
+  color: #202124;
+  display: block;
+  height: 40px;
+  padding: 0 50px;
+  width: 100%;
+  -webkit-appearance: none;
+  outline: none;
+  text-overflow: ellipsis;
+  padding-left: 10px;
+  font-family: inherit;
+}
 
 .-hide {
   display: none !important;
@@ -449,46 +467,88 @@ body {
   padding: unset !important;
 }
 
+.-superblock .-productfloor .-head .-search-form {
+
+}
+.-head .-search-form .-search-btn {
+  right: 0;
+  top: 0;
+  width: 40px !important;
+  height: 40px !important;
+  background-color: var(--dark-blue);
+  border-top-left-radius: unset;
+  border-bottom-left-radius: unset;
+  margin: unset !important;
+}
+
+.-head .-search-form .-search-btn .spin-loader {
+  border: 2px solid white;
+  border-bottom-color: transparent;
+  border-top-color: transparent;
+  display: none;
+}
+
+.-head .-search-form .-search-btn.searching {
+  pointer-events: none;
+}
+
+.-head .-search-form .-search-btn.searching .spin-loader {
+  display: block;
+}
+.-head .-search-form .-search-btn.searching .search-icon {
+  display: none;
+}
+
+.-head .-search-form .-search-btn .search-icon,
+.-head .-search-form .-search-btn .-search-btn-clickable {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-70%,-70%) scale(0.8);
+}
+
+.-head .-search-form .-search-btn .-search-btn-clickable {
+  transform: translate(-50%,-50%);
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
 .-superblock .-productfloor .-head .-title .-title-desc {
   font-weight: 500;
   font-size: 0.8em;
 }
 
-.-superblock .-productfloor .-head .-see-all {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  column-gap: 2px;
-  height: 100%;
-  position: relative;
+.search-icon {
+	width: 20px;
+	height: 20px;
+  color: white;
+  border-radius: 50%;
+  border: 3px solid white;
+	background-color: transparent;
 }
 
-.-superblock .-productfloor .-head .-see-all .-see-all-clickable {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  z-index: 2;
-  cursor: pointer;
+.search-icon::before {
+  width: 0px;
+  height: 0px;
+  content: "";
+  display: block;
+  margin-top: 8px;
+  margin-left: 9px;
+  transform: translate(40%,45%) rotate(-45deg);
+  border-bottom: 8px solid currentColor;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
 }
-.-superblock .-productfloor .-head .-see-all .-txt { 
-  text-transform: uppercase;
-  font-weight: 500;
-  align-items: center;
-  column-gap: 4px;
-  font-size: 14px; 
-}
-
-.-superblock .-productfloor .-head .-see-all .-arrow {
-  content: '';
+.search-icon::after {
+  content: "";
+  height: 12px;
   width: 6px;
-  height: 6px;
-  border-left: unset !important;
-  border-bottom: unset !important;
-  background-color: transparent;
-  transform: rotate(45deg);
+  display: block;
+  background-color: currentColor;
+  transform: translate(320%,0%) rotate(-45deg);
+  border-bottom-left-radius: 50px;
+  border-bottom-right-radius: 50px;
 }
 
 .-superblock .-productfloor .-skus {
@@ -558,7 +618,7 @@ body {
 .-sku .-details .-features {
   display: flex;
   flex-direction: column;
-  row-gap: 2px;
+  row-gap: 4px;
   align-items: flex-start;
   width: 100%;
 }
@@ -567,12 +627,23 @@ body {
   width: 100%;
 }
 .-sku .-details .-features .-official-store {
-  font-size: 0.7em;
-  font-weight: 500;
-  padding: 4px;
-  letter-spacing: 1px;
+  font-weight: 600;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 4px;
 }
+
+.-sku .-buy {
+  bottom: 8px;
+  right: 8px;
+  width: unset !important;
+  height: unset !important;
+  padding: 8px 16px;
+  color: white !important;
+}
+
 
 .-sku .-details .-newPrice {
   font-weight: 500;
