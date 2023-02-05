@@ -7,11 +7,15 @@ export class Api extends Util{
   }
 
   
-  mobile(raw_products: string) {
-    var start = raw_products.indexOf('"products":')
-    var products = '{' + raw_products.substring(start, raw_products.length)
-    var l_idx = products.indexOf(',"head"')
-    return products.substring(0, l_idx - 1) + '}'
+  mobile(str: string) {
+    const start = str.indexOf('"products":')
+    const products = '{' + str.substring(start, str.length)
+    const eIdx = products.indexOf(',"head"')
+    return products.substring(0, eIdx - 1) + '}'
+  }
+
+  desktop(str: string) {
+    return ''
   }
 
   async products(url: string) {
@@ -22,7 +26,7 @@ export class Api extends Util{
     // const closingBraces = this.braceIndices(productsStr, this.escapeStr("}]"))
     // const endIdx = closingBraces[closingBraces.length - 1]
     // const products = productsStr.substring(0, endIdx + 2) + '}'
-    const products = this.mobile(text)
+    const products = this.isMobile ? this.mobile(text) : this.desktop(text)
     let skus: any[] = []
     try {
       localStorage.setItem("apiProducts", products)

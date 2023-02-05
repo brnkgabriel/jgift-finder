@@ -187,4 +187,7 @@ export class Util {
 
     return properties
   }
+  randomize(list:any[]) {
+    return [...list].sort(() => Math.random() - 0.5)
+  }
 }

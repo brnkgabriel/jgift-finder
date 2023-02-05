@@ -41,6 +41,8 @@ export const constants = {
   SKUROWQUERY: ".-sku_row",
   MAINELQUERY: ".-main-el",
   FLIPPERQUERY: ".-flipper",
+  FLIPPERBACKQUERY: ".-flipper .-back",
+  SUPERBLOCKTITLEQUERY: ".-similar-products",
   SWITCHQUERY: ".-switcher",
   SELECTIONQUERY: ".-selection",
   CONTAINERQUERY: ".-container",

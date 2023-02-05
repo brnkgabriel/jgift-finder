@@ -43,6 +43,7 @@ export interface iSKU {
   url: string;
   properties?: string[];
   singularName?: string;
+  pluralName?: string;
 }
 
 export interface iSuperblock {
