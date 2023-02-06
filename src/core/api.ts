@@ -14,10 +14,26 @@ export class Api extends Util{
     return products.substring(0, eIdx - 1) + '}'
   }
 
+
   desktop(str: string) {
-    return ''
+    var start = str.indexOf('"products":')
+    var products = '{' + str.substring(start, str.length)
+    var closing_brace_indices = this.braceIndices(products, this.escape("}]"))
+    var last_idx = closing_brace_indices[closing_brace_indices.length - 1]
+    return products.substring(0, last_idx + 2) + '}'
   }
 
+  braceIndices(str: string, brace: string) {
+    var regex = new RegExp(brace, "gi"), result, indices = []
+    while ((result = regex.exec(str))) {
+      indices.push(result.index)
+    }
+    return indices
+  }
+
+  escape(str: string) {
+    return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+  }
   async products(url: string) {
     const response = await fetch(url)
     const text = await response.text()
@@ -41,13 +57,5 @@ export class Api extends Util{
   
   escapeStr(str: string) {
     return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
-  }
-
-  braceIndices(str: string, brace: string) {
-    var regex = new RegExp(brace, "gi"), result, indices = []
-    while ((result = regex.exec(str))) {
-      indices.push(result.index)
-    }
-    return indices
   }
 }
