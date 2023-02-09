@@ -87,8 +87,7 @@ export class Controller extends Util {
 
     switch (type) {
       case constants.CATTYPE:
-        const category = target.getAttribute("data-category")
-        this.updateProductFloor(category as string)
+        this.categoryBtnUpdate(target)
         break;
       case constants.DIRBTN:
         const direction = target.getAttribute("data-dir")
@@ -97,10 +96,6 @@ export class Controller extends Util {
         direction === constants.NEXT
           ? this.scrollTonext(scrollale as HTMLElement)
           : this.scrollToprev(scrollale as HTMLElement)
-        break;
-      case constants.SEEALL:
-        const url = target.getAttribute("data-href")
-        location.href = url as string
         break;
       case constants.COMPARE:
         this.updateSelection(target)
@@ -115,6 +110,12 @@ export class Controller extends Util {
         break;
     }
 
+  }
+
+  categoryBtnUpdate(target: HTMLElement) {
+    this.searchInput.value = ""
+    const category = target.getAttribute("data-category")
+    this.updateProductFloor(category as string)
   }
 
   btnFilterUpdate(target: HTMLElement) {

@@ -56,8 +56,7 @@ body {
 .-container input:not([type="radio"]), .-container textarea, .-container select {
   background-color: white;
   border: none;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px 0 rgba(60,64,67,.30),0 1px 3px 1px rgba(60,64,67,.15);
+  border-radius: 8px;
   box-sizing: border-box;
   color: #202124;
   display: block;
@@ -464,10 +463,11 @@ body {
   justify-content: start;
   align-items: start;
   padding: unset !important;
+  text-align: left !important;
 }
 
 .-superblock .-productfloor .-head .-search-form {
-
+  box-shadow: var(--box-shadow);
 }
 .-head .-search-form .-search-btn {
   right: 0;
@@ -477,6 +477,8 @@ body {
   background-color: var(--dark-blue);
   border-top-left-radius: unset;
   border-bottom-left-radius: unset;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
   margin: unset !important;
 }
 
@@ -737,6 +739,10 @@ body {
   margin: unset !important;
   font-size: 0.8em;
 } 
+
+.-compare {
+  background-color: var(--dark-blue);
+}
 
 /* rules & eligibility */
 

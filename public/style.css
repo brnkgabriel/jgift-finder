@@ -56,8 +56,7 @@ body {
 .-container input:not([type="radio"]), .-container textarea, .-container select {
   background-color: white;
   border: none;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px 0 rgba(60,64,67,.30),0 1px 3px 1px rgba(60,64,67,.15);
+  border-radius: 8px;
   box-sizing: border-box;
   color: #202124;
   display: block;
@@ -67,7 +66,7 @@ body {
   -webkit-appearance: none;
   outline: none;
   text-overflow: ellipsis;
-  padding-left: 10px;
+  padding-left: 12px;
   font-family: inherit;
 }
 
@@ -126,8 +125,8 @@ body {
 #initiative .-banner .-how-it-works {
   background-color: var(--font-color);
   color: white;
-  bottom: 8px;
-  right: 8px;
+  bottom: 0px;
+  right: 0px;
   padding: 4px 8px;
   font-weight: 500;
   border-bottom-right-radius: 4px;
@@ -237,8 +236,7 @@ body {
 /* category freelinks */
 .-flipper {
   height: 320px;
-  overflow: hidden; 
-  margin: 8px 0;
+  overflow: hidden;
 }
 
 .-flipper.-switch {
@@ -279,6 +277,11 @@ body {
   overflow-y: auto;
 }
 
+.-main-el .-back { 
+  display: grid;
+  grid-template-columns: repeat(3, 376px);
+  gap: 8px; 
+}
 
 .-switch .-back {
   opacity: 1;
@@ -286,8 +289,8 @@ body {
   padding: 8px;
 }
 
-.-back .-sku {
-  
+.-banner .-back .-sku {
+  max-height: 252px;
 }
 
 .-selection .-back {
@@ -298,12 +301,12 @@ body {
 .-back .-sku {
   width: 100%;
   height:  calc(40vw - 16px);
+  max-height: 176px;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
   background: white;
-  border-radius: 4px;
-  margin: 8px 0;
+  border-radius: 4px; 
   box-shadow: var(--box-shadow);
 }
 
@@ -318,6 +321,11 @@ body {
   .-back .-sku .-details {
     width: 288px !important;
   }
+}
+
+.-banner .-back .-sku .-img {
+  max-width: unset;
+  width: 252px !important;
 }
 
 .-back .-sku .-img {
@@ -336,6 +344,11 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.-banner .-back .-sku .-details {
+  max-width: unset;
+  width: calc(100% - 252px) !important;
 }
 
 .spin-loader {
@@ -365,7 +378,7 @@ body {
 
 .-scrollable {
   display: grid;
-  grid-template-columns: repeat(10,1fr);
+  grid-template-columns: repeat(10,109.8px);
   grid-template-rows: repeat(2,1fr);
   grid-auto-rows: minmax(120px,auto);
   grid-gap: 8px;
@@ -456,11 +469,11 @@ body {
 }
 
 .-superblock .-productfloor .-head {
-  height: 48px;
+  height: 56px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 8px;
+  padding: 8px;
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
   box-shadow: unset;
@@ -477,7 +490,8 @@ body {
 }
 
 .-superblock .-productfloor .-head .-search-form {
-
+  width: 30%;
+  box-shadow: var(--box-shadow);
 }
 .-head .-search-form .-search-btn {
   right: 0;
@@ -487,6 +501,8 @@ body {
   background-color: var(--dark-blue);
   border-top-left-radius: unset;
   border-bottom-left-radius: unset;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
   margin: unset !important;
 }
 
@@ -521,11 +537,6 @@ body {
   width: 100%;
   height: 100%;
   z-index: 2;
-}
-
-.-superblock .-productfloor .-head .-title .-title-desc {
-  font-weight: 500;
-  font-size: 0.8em;
 }
 
 .search-icon {
@@ -609,6 +620,12 @@ body {
   font-weight: bold;
 }
 
+.-main-el .-cats .-sku .-discount {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .-sku .-details {
   padding: 8px;
 }
@@ -664,6 +681,15 @@ body {
   justify-content: flex-start;
   align-items: center;
   margin-top: 4px;
+}
+
+.-main-el .-cats {
+  margin: 8px 0;
+}
+
+.-main-el .-cats .-sku .-details .-prices {
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .-sku .-details .-prices .-price.-new {
@@ -723,6 +749,11 @@ body {
   margin: 8px 0px;
 }
 
+.-sku > .-atc-compare {
+  padding: 8px;
+  margin: unset;
+}
+
 .-atc, .-compare {
   vertical-align: unset !important;
   width: unset !important;
@@ -732,6 +763,10 @@ body {
   padding: 8px !important;
   margin: unset !important;
   font-size: 0.8em;
+}
+
+.-compare {
+  background-color: var(--dark-blue);
 }
 
 /* rules & eligibility */
